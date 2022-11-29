@@ -66,31 +66,34 @@ frappe.ui.form.on('Expense Entry', {
 	},
 
 	payment_account: function(frm){
-		set_account_currency_and_balance(payment_account, account_currency, payment_account_balance)
+		set_account_currency_and_balance(frm, frm.doc.payment_account)
 	},
-
-	set_account_currency_and_balance: function(frm, account, currency_field, balance_field) {
-		if (frm.doc.posting_date && account) {
+	get_taxes: function(frm) {
+		if(frm.doc.taxes) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
-				args: {
-					"account": account,
-					"date": frm.doc.posting_date,
-					"cost_center": frm.doc.cost_center
-				},
-				callback: function(r, ) {
-					if(r.message) {
-						console.log(r.message);
-						frappe.run_serially([
-							() => frm.set_value(currency_field, r.message['account_currency']),
-							() => {
-								frm.set_value(balance_field, r.message['account_balance']);
-							}
-						]);
-					}
+				method: "calculate_taxes",
+				doc: frm.doc,
+				callback: () => {
+					refresh_field("expense_entry_taxes_and_charges");
+					frm.trigger("calculate_grand_total");
 				}
 			});
 		}
+	},
+	cost_center: function(frm) {
+		frm.events.set_child_cost_center(frm);
+	},
+
+	validate: function(frm) {
+		frm.events.set_child_cost_center(frm);
+	},
+
+	set_child_cost_center: function(frm){
+		(frm.doc.expenses || []).forEach(function(d) {
+			if (!d.cost_center){
+				d.cost_center = frm.doc.cost_center;
+			}
+		});
 	},
 	
 });
@@ -106,19 +109,14 @@ frappe.ui.form.on('Expense Entry Item', {
 		frm.trigger("get_taxes");
 		frm.trigger("calculate_grand_total");
 	},
+	is_taxable: function(frm, cdt, cdn){
+		cur_frm.cscript.calculate_total(frm.doc, cdt, cdn);
+		frm.trigger("get_taxes");
+		frm.trigger("calculate_grand_total");
+	},
 	cost_center: function(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "expenses", "cost_center");
 	}
-    // items_add: function(frm, cdt, cdn){
-    //     var d = locals[cdt][cdn];
-    //     if((d.cost_center === "" || typeof d.cost_center == 'undefined')) { 
-    //         if (cur_frm.doc.cost_center != "" || typeof cur_frm.doc.cost_center != 'undefined') {
-    //             d.cost_center = cur_frm.doc.cost_center; 
-    //             cur_frm.refresh_field("expenses");
-    //         }
-    //     }
-	// }
-	
 });
 
 let get_payment_mode_account = function(frm, mode_of_payment, callback) {
@@ -150,9 +148,13 @@ cur_frm.cscript.validate = function(doc) {
 cur_frm.cscript.calculate_total = function(doc){
 	doc.total_quantity = 0;
 	doc.total = 0;
+	doc.total_taxable_amount = 0;
 	$.each((doc.expenses || []), function(i, d) {
 		doc.total += d.amount;
 		doc.total_quantity += 1;
+		if(d.is_taxable){
+			doc.total_taxable_amount += d.amount;
+		}
 	});
 };
 
@@ -169,8 +171,22 @@ frappe.ui.form.on("Expense Entry Taxes and Charges", {
 		if(child.account_head && !child.description) {
 			// set description from account head
 			child.description = child.account_head.split(' - ').slice(0, -1).join(' - ');
-			refresh_field("taxes");
 		}
+		if(child.account_head){
+			frappe.call({
+				method: "expenses.expenses.doctype.expense_entry.expense_entry.get_tax_rate",
+				args: {
+					"account": child.account_head
+				},
+				callback: function(r, ) {
+					if(r.message) {
+						child.rate = r.message;
+					}
+					refresh_field("expense_entry_taxes_and_charges");
+				}
+			});
+		}
+		refresh_field("expense_entry_taxes_and_charges");
 	},
 
 	calculate_total_tax: function(frm, cdt, cdn) {
@@ -180,7 +196,7 @@ frappe.ui.form.on("Expense Entry Taxes and Charges", {
 	},
 
 	calculate_tax_amount: function(frm) {
-		frm.doc.total_taxes_and_charges = 0;
+		frm.doc.total_tax_amount = 0;
 		(frm.doc.taxes || []).forEach(function(d) {
 			frm.doc.total_tax_amount += d.tax_amount;
 		});
@@ -199,3 +215,42 @@ frappe.ui.form.on("Expense Entry Taxes and Charges", {
 		frm.trigger("calculate_total_tax", cdt, cdn);
 	}
 });
+
+let set_account_currency_and_balance = function(frm, account) {
+	if (frm.doc.posting_date && account) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
+			args: {
+				"account": account,
+				"date": frm.doc.posting_date,
+				"cost_center": frm.doc.cost_center
+			},
+			callback: function(r, ) {
+				if(r.message) {
+					frappe.run_serially([
+						() => frm.set_value('account_currency', r.message['account_currency']),
+						() => {
+							frm.set_value('payment_account_balance', r.message['account_balance']);
+						}
+					]);
+				}
+			}
+		});
+	}
+}
+
+let get_tax_rate = function(account) {
+	if (account) {
+		frappe.call({
+			method: "expenses.expenses.doctype.expense_entry.expense_entry.get_tax_rate",
+			args: {
+				"account": account
+			},
+			callback: function(r, ) {
+				if(r.message) {
+					return r.message
+				}
+			}
+		});
+	}
+}

@@ -176,12 +176,14 @@
   {
    "fieldname": "reference_no",
    "fieldtype": "Data",
-   "label": "Reference No"
+   "label": "Reference No",
+   "mandatory_depends_on": "eval:(doc.mode_of_payment != 'Cash')"
   },
   {
    "fieldname": "reference_date",
    "fieldtype": "Date",
-   "label": "Reference Date"
+   "label": "Reference Date",
+   "mandatory_depends_on": "eval:(doc.mode_of_payment != 'Cash')"
   },
   {
    "fieldname": "column_break_26",
@@ -214,7 +216,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "taxes_and_charges_section",
    "fieldtype": "Section Break",
    "label": "Taxes and Charges"
@@ -250,7 +251,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-29 09:18:01.723035",
+ "modified": "2022-11-29 11:59:46.322717",
  "modified_by": "Administrator",
  "module": "Expenses",
  "name": "Expense Entry",
