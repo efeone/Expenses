@@ -14,11 +14,31 @@ class ExpenseEntry(AccountsController):
 			frappe.throw(_("Amount cannot be zero"))
 		if self.total_amount < 0:
 			frappe.throw(_("Amount cannot be negative"))
+		self.calculate_total_amount()
+		self.set_cost_center()
+		self.calculate_taxes()
 		self.set_missing_values()
-	
+
 	def on_submit(self):
-		self.make_gl_entries()
-	
+		if self.payment_account:
+			self.make_gl_entries()
+
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ("GL Entry")
+		if self.payment_account:
+			self.make_gl_entries(cancel=True)
+
+	def set_cost_center(self):
+		if not self.cost_center:
+			self.cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
+
+	def calculate_total_amount(self):
+		self.total = 0
+		self.total_taxable_amount = 0
+		for d in self.get("expenses"):
+			self.total += flt(d.amount)
+			if d.is_taxable:
+				self.total_taxable_amount += flt(d.amount)
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.total_amount) > 0:
@@ -29,9 +49,6 @@ class ExpenseEntry(AccountsController):
 		if not self.posting_date:
 			self.posting_date = nowdate()
 
-		if not self.cost_center:
-			self.cost_center = erpnext.get_default_cost_center(self.company)
-	
 	def get_gl_entries(self):
 		gl_entry = []
 
@@ -62,6 +79,7 @@ class ExpenseEntry(AccountsController):
 						"debit_in_account_currency": data.amount,
 						"against": self.payment_account,
 						"cost_center": data.cost_center or self.cost_center,
+						"remarks": data.description
 					},
 					item=data,
 				)
@@ -86,3 +104,22 @@ class ExpenseEntry(AccountsController):
 					item=tax,
 				)
 			)
+
+	@frappe.whitelist()
+	def calculate_taxes(self):
+		self.total_tax_amount = 0
+		for tax in self.expense_entry_taxes_and_charges:
+			if tax.rate:
+				tax.tax_amount = flt(self.total_taxable_amount) * flt(tax.rate / 100)
+
+			tax.total = flt(tax.tax_amount) + flt(self.total_taxable_amount)
+			self.total_tax_amount += flt(tax.tax_amount)
+
+		self.total_amount = (
+			flt(self.total)
+			+ flt(self.total_tax_amount)
+		)
+
+@frappe.whitelist()
+def get_tax_rate(account):
+	return frappe.db.get_value("Account", account, 'tax_rate')
