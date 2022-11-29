@@ -1,0 +1,277 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2022-11-26 10:10:45.729647",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "mode_of_payment",
+  "expense_approver",
+  "column_break_3",
+  "posting_date",
+  "company",
+  "status",
+  "payment_account_details_section",
+  "payment_account",
+  "column_break_10",
+  "account_currency",
+  "payment_account_balance",
+  "accounting_dimensions_section",
+  "cost_center",
+  "column_break_15",
+  "project",
+  "expense_details_section",
+  "expenses",
+  "section_break_16",
+  "total_quantity",
+  "column_break_16",
+  "total",
+  "total_taxable_amount",
+  "taxes_and_charges_section",
+  "expense_entry_taxes_and_charges",
+  "section_break_25",
+  "reference_no",
+  "reference_date",
+  "column_break_26",
+  "total_tax_amount",
+  "total_amount",
+  "more_information_section",
+  "column_break_32",
+  "user_remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "EXP-.YY.-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Initiated\nPending\nApproved\nRejected"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "mode_of_payment",
+   "depends_on": "mode_of_payment",
+   "fieldname": "payment_account_details_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Account Details"
+  },
+  {
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Payment Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_account_balance",
+   "fieldtype": "Currency",
+   "label": "Payment Account Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_details_section",
+   "fieldtype": "Section Break",
+   "label": "Expense Details"
+  },
+  {
+   "fieldname": "total_quantity",
+   "fieldtype": "Data",
+   "label": "Total Quantity  ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_taxable_amount",
+   "fieldtype": "Currency",
+   "label": "Total Taxable Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "label": "Reference No"
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "label": "Reference Date"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user_remarks",
+   "fieldtype": "Small Text",
+   "label": "User Remarks "
+  },
+  {
+   "fieldname": "expenses",
+   "fieldtype": "Table",
+   "label": "Expense Items",
+   "options": "Expense Entry Item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Expense Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "taxes_and_charges_section",
+   "fieldtype": "Section Break",
+   "label": "Taxes and Charges"
+  },
+  {
+   "fieldname": "expense_entry_taxes_and_charges",
+   "fieldtype": "Table",
+   "label": "Expense Entry Taxes and Charges",
+   "options": "Expense Entry Taxes and Charges"
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "total_tax_amount",
+   "fieldtype": "Currency",
+   "label": "Total Tax Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_approver",
+   "fieldtype": "Link",
+   "label": "Expense Approver",
+   "options": "User"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-29 09:18:01.723035",
+ "modified_by": "Administrator",
+ "module": "Expenses",
+ "name": "Expense Entry",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
