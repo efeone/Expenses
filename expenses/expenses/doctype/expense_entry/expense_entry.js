@@ -5,8 +5,6 @@ frappe.ui.form.on('Expense Entry', {
 	refresh:function(frm){
 		erpnext.hide_company();
 		frm.events.show_general_ledger(frm);
-
-		
 	},
 	setup: function(frm) {
 		frm.set_query("payment_account", function() {
@@ -21,10 +19,20 @@ frappe.ui.form.on('Expense Entry', {
 			}
 		});
 
+		frm.set_query("expense_account", "expenses", function() {
+			return {
+				filters: [
+					['company', '=', frm.doc.company],
+					["is_group",'=', 0]
+				]
+			};
+		});
+
 		frm.set_query("account_head", "expense_entry_taxes_and_charges", function() {
 			return {
 				filters: [
 					['company', '=', frm.doc.company],
+					["is_group",'=', 0],
 					['account_type', 'in', ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"]]
 				]
 			};
@@ -95,7 +103,7 @@ frappe.ui.form.on('Expense Entry', {
 			}
 		});
 	},
-	
+
 });
 
 frappe.ui.form.on('Expense Entry Item', {
